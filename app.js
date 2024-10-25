@@ -12,6 +12,9 @@ app.use(bodParser.json()); // req.body가 객체로 인식이 됩니다.
 
 app.use("/api", indexRouter);
 // /api/user
+app.get("/", (req, res) => {
+  res.send("Welcome to Noona Shop API! Please use the /api endpoints.");
+});
 
 const mongoURI = process.env.LOCAL_DB_ADDRESS;
 mongoose
