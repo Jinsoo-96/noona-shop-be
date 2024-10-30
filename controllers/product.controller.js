@@ -36,8 +36,19 @@ productController.createProduct = async (req, res) => {
 
 productController.getProducts = async (req, res) => {
   try {
-    const products = await Product.find({});
-    res.status(200).json({ status: "success", data: products });
+    const { page, name } = req.query;
+    // if (name) {
+    //   const product = await Product.find({
+    //     name: { $regex: name, $options: "i" },
+    //   }); // 9-16강의 내용
+    // } else {
+    //   const products = await Product.find({});
+    // }
+    const cond = name ? { name: { $regex: name, $options: "i" } } : {};
+    let query = Product.find(cond);
+    const productList = await query.exec();
+
+    res.status(200).json({ status: "success", data: productList });
   } catch (error) {
     res.status(400).json({ status: "fail", error: error.message });
   }
