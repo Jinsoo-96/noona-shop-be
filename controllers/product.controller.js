@@ -1,4 +1,5 @@
 const Product = require("../models/Product");
+const PAGE_SIZE = 5;
 
 const productController = {};
 
@@ -45,10 +46,21 @@ productController.getProducts = async (req, res) => {
     //   const products = await Product.find({});
     // }
     const cond = name ? { name: { $regex: name, $options: "i" } } : {};
-    let query = Product.find(cond);
-    const productList = await query.exec();
+    let query = Product.find(cond).sort({ updatedAt: -1 }); // updatedAt 기준 내림차순 정렬 추가
+    let response = { status: "success" };
 
-    res.status(200).json({ status: "success", data: productList });
+    if (page) {
+      query.skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE); // -> mongoose함수 이해하자
+      // 최종 몇개 페이지?
+      // 데이터가 총 몇개 잇는지
+      const totalItemNum = await Product.find(cond).countDocuments(); // -> mongoose함수 이해하자 count() 이제 없음.
+      // 데이터 총 개수 / PAGE_SIZE
+      const totalPageNum = Math.ceil(totalItemNum / PAGE_SIZE);
+      response.totalPageNum = totalPageNum;
+    }
+    const productList = await query.exec();
+    response.data = productList;
+    res.status(200).json(response);
   } catch (error) {
     res.status(400).json({ status: "fail", error: error.message });
   }
