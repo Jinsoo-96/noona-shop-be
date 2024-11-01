@@ -39,4 +39,6 @@ router.get(
   authController.checkAdminPermission,
   productController.getDeletedProducts
 );
+
+router.get("/:id", productController.getProductById);
 module.exports = router;

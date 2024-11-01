@@ -110,6 +110,18 @@ productController.deleteProduct = async (req, res) => {
   }
 };
 
+// 디테일
+productController.getProductById = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const product = await Product.findById(productId);
+    if (!product) throw new Error("No item found");
+    res.status(200).json({ status: "success", data: product });
+  } catch (error) {
+    return res.status(400).json({ status: "fail", error: error.message });
+  }
+};
+
 // 휴지통 기능
 productController.getDeletedProducts = async (req, res) => {
   try {
@@ -120,6 +132,7 @@ productController.getDeletedProducts = async (req, res) => {
   }
 };
 
+// 휴지통 기능
 productController.restoreProduct = async (req, res) => {
   try {
     const { id } = req.params;
