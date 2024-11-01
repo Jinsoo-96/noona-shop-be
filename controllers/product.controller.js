@@ -84,7 +84,7 @@ productController.updateProduct = async (req, res) => {
     } = req.body;
 
     const product = await Product.findByIdAndUpdate(
-      { _id: productId },
+      { _id: productId, updatedAt: Date.now() },
       { sku, name, size, image, price, description, category, stock, status },
       { new: true }
     );
@@ -125,7 +125,7 @@ productController.restoreProduct = async (req, res) => {
     const { id } = req.params;
     const product = await Product.findByIdAndUpdate(
       id,
-      { isDeleted: false },
+      { isDeleted: false, updatedAt: Date.now() },
       { new: true }
     );
     if (!product) throw new Error("No item found");
