@@ -32,7 +32,7 @@ router.put(
   authController.checkAdminPermission,
   productController.restoreProduct
 );
-
+//휴지통
 router.get(
   "/deleted",
   authController.authenticate,
