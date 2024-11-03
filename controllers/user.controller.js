@@ -35,7 +35,7 @@ userController.getUser = async (req, res) => {
     if (user) {
       return res.status(200).json({ status: "success", user });
     }
-    throw new Error("Invalid token");
+    throw new Error("로그인이 필요합니다."); //invalid token
   } catch (error) {
     res.status(400).json({ status: "error", error: error.message });
   }
