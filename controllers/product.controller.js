@@ -132,13 +132,25 @@ productController.checkStock = async (item) => {
       message: `${product.name}의 ${item.size}재고가 부족합니다.`,
     };
   }
-  const newStock = { ...product.stock };
+  // const newStock = { ...product.stock };
+  // newStock[item.size] -= item.qty;
+  // product.stock = newStock;
+
+  // await product.save();
+  // 충분하다면, 재고에서 -qty 성공
+  return { isVerify: true };
+};
+
+productController.decreaseStock = async (item) => {
+  const product = await Product.findById(item.productId);
+  // product.stock[item.size] -= item.qty;
+  // await product.save();
+
+  const newStock = { ...product.stock }; // 새로 객체를 만들어야 반영이 됨 ㅠ
   newStock[item.size] -= item.qty;
   product.stock = newStock;
 
   await product.save();
-  // 충분하다면, 재고에서 -qty 성공
-  return { isVerify: true };
 };
 
 productController.checkItemListStock = async (itemList) => {
