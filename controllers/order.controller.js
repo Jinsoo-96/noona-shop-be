@@ -44,4 +44,25 @@ orderController.createOrder = async (req, res) => {
   }
 };
 
+orderController.checkOrderListStock = async (req, res) => {
+  try {
+    const { orderList } = req.body;
+
+    const insufficientStockItems = await productController.checkItemListStock(
+      orderList
+    );
+    // 재고가 충분하지 않는 아이템이 있었다 => 에러
+    if (insufficientStockItems.length > 0) {
+      const errorMessage = insufficientStockItems.reduce(
+        (total, item) => (total += item.message + "\n"),
+        ""
+      );
+      throw new Error(errorMessage);
+    }
+    res.status(200).json({ status: "success" });
+  } catch (error) {
+    return res.status(400).json({ status: "fail", error: error.message });
+  }
+};
+
 module.exports = orderController;
