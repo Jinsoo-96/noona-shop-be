@@ -70,14 +70,16 @@ orderController.getOrder = async (req, res, next) => {
   try {
     const { userId } = req;
 
-    const orderList = await Order.find({ userId: userId }).populate({
-      path: "items",
-      populate: {
-        path: "productId",
-        model: "Product",
-        select: "image name",
-      },
-    });
+    const orderList = await Order.find({ userId: userId })
+      .sort({ createdAt: -1 }) // updatedAt 기준 내림차순 정렬 추가
+      .populate({
+        path: "items",
+        populate: {
+          path: "productId",
+          model: "Product",
+          select: "image name",
+        },
+      });
     // const totalItemNum = await Order.find({ userId: userId }).count();
     const totalItemNum = await Order.countDocuments({ userId });
 
@@ -100,6 +102,7 @@ orderController.getOrderList = async (req, res, next) => {
 
     // 조건에 맞는 주문 목록을 페이징하여 조회
     const orderList = await Order.find(cond)
+      .sort({ createdAt: -1 }) // updatedAt 기준 내림차순 정렬 추가
       .populate("userId")
       .populate({
         path: "items",
