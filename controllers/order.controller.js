@@ -2,6 +2,7 @@ const orderController = {};
 const Order = require("../models/Order");
 const productController = require("./product.controller");
 const { randomStringGenerator } = require("../utils/randomStringGenerator");
+const PAGE_SIZE = 5;
 
 orderController.createOrder = async (req, res) => {
   try {
@@ -60,6 +61,79 @@ orderController.checkOrderListStock = async (req, res) => {
       throw new Error(errorMessage);
     }
     res.status(200).json({ status: "success" });
+  } catch (error) {
+    return res.status(400).json({ status: "fail", error: error.message });
+  }
+};
+
+orderController.getOrder = async (req, res, next) => {
+  try {
+    const { userId } = req;
+
+    const orderList = await Order.find({ userId: userId }).populate({
+      path: "items",
+      populate: {
+        path: "productId",
+        model: "Product",
+        select: "image name",
+      },
+    });
+    // const totalItemNum = await Order.find({ userId: userId }).count();
+    const totalItemNum = await Order.countDocuments({ userId });
+
+    const totalPageNum = Math.ceil(totalItemNum / PAGE_SIZE);
+    res.status(200).json({ status: "success", data: orderList, totalPageNum });
+  } catch (error) {
+    return res.status(400).json({ status: "fail", error: error.message });
+  }
+};
+
+orderController.getOrderList = async (req, res, next) => {
+  try {
+    const { page = 1, ordernum } = req.query;
+
+    // ordernum이 있을 때만 조건에 추가, 없으면 전체 주문 조회
+    let cond = {};
+    if (ordernum) {
+      cond.orderNum = { $regex: ordernum, $options: "i" };
+    }
+
+    // 조건에 맞는 주문 목록을 페이징하여 조회
+    const orderList = await Order.find(cond)
+      .populate("userId")
+      .populate({
+        path: "items",
+        populate: {
+          path: "productId",
+          model: "Product",
+          select: "image name",
+        },
+      })
+      .skip((page - 1) * PAGE_SIZE)
+      .limit(PAGE_SIZE);
+
+    // 조건에 맞는 주문 개수를 카운트
+    const totalItemNum = await Order.countDocuments(cond);
+    const totalPageNum = Math.ceil(totalItemNum / PAGE_SIZE);
+
+    res.status(200).json({ status: "success", data: orderList, totalPageNum });
+  } catch (error) {
+    return res.status(400).json({ status: "fail", error: error.message });
+  }
+};
+
+orderController.updateOrder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const order = await Order.findByIdAndUpdate(
+      id,
+      { status: status },
+      { new: true }
+    );
+    if (!order) throw new Error("Can't find order");
+
+    res.status(200).json({ status: "success", data: order });
   } catch (error) {
     return res.status(400).json({ status: "fail", error: error.message });
   }
