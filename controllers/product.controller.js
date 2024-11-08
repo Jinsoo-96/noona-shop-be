@@ -37,7 +37,7 @@ productController.createProduct = async (req, res) => {
 
 productController.getProducts = async (req, res) => {
   try {
-    const { page, name } = req.query;
+    const { page, name, category } = req.query;
     let response = { status: "success" };
     // if (name) {
     //   const product = await Product.find({
@@ -46,9 +46,30 @@ productController.getProducts = async (req, res) => {
     // } else {
     //   const products = await Product.find({});
     // }
-    const cond = name
-      ? { name: { $regex: name, $options: "i" }, isDeleted: false }
-      : { isDeleted: false };
+
+    // const cond = name
+    //   ? { name: { $regex: name, $options: "i" }, isDeleted: false }
+    //   : { isDeleted: false };
+
+    // 카테고리까지 필터링
+    // // 조건 객체 초기화
+    // let cond = { isDeleted: false }; // 기본 조건: 삭제되지 않은 제품
+
+    // // 이름 필터링 조건 추가
+    // if (name) {
+    //   cond.name = { $regex: name, $options: "i" };
+    // }
+
+    // // 카테고리 필터링 조건 추가
+    // if (category) {
+    //   cond.category = { $in: [category] };
+    // }
+    const cond = {
+      isDeleted: false,
+      ...(name && { name: { $regex: name, $options: "i" } }),
+      ...(category && { category: { $in: [category] } }),
+    };
+
     let query = Product.find(cond).sort({ updatedAt: -1 }); // updatedAt 기준 내림차순 정렬 추가
 
     if (page) {
