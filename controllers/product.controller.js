@@ -80,7 +80,12 @@ productController.getProducts = async (req, res) => {
       const totalItemNum = await Product.find(cond).countDocuments(); // -> mongoose함수 이해하자 count() 이제 없음.
       // 데이터 총 개수 / PAGE_SIZE
       const totalPageNum = Math.ceil(totalItemNum / PAGE_SIZE);
-      response.totalPageNum = totalPageNum;
+
+      if (totalPageNum <= 1) {
+        response.totalPageNum = 1;
+      } else {
+        response.totalPageNum = totalPageNum;
+      }
     }
     const productList = await query.exec();
     response.data = productList;
