@@ -12,6 +12,7 @@ const productSchema = Schema(
     stock: { type: Object, required: true },
     status: { type: String, default: "active" },
     isDeleted: { type: Boolean, default: false },
+    productAt: { type: Date, required: true }, // 생성 또는 복구된 시각을 저장
   },
   { timestamps: true }
 );

@@ -26,6 +26,7 @@ productController.createProduct = async (req, res) => {
       price,
       stock,
       statue,
+      productAt: new Date(), // 상품이 처음 생성된 시각을 저장
     });
 
     await product.save();
@@ -70,7 +71,7 @@ productController.getProducts = async (req, res) => {
       ...(category && { category: { $in: [category] } }),
     };
 
-    let query = Product.find(cond).sort({ updatedAt: -1 }); // updatedAt 기준 내림차순 정렬 추가
+    let query = Product.find(cond).sort({ productAt: -1 }); // updatedAt 기준 내림차순 정렬 추가
 
     if (page) {
       query.skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE); // -> mongoose함수 이해하자
@@ -105,8 +106,19 @@ productController.updateProduct = async (req, res) => {
     } = req.body;
 
     const product = await Product.findByIdAndUpdate(
-      { _id: productId, updatedAt: Date.now() },
-      { sku, name, size, image, price, description, category, stock, status },
+      { _id: productId },
+      {
+        sku,
+        name,
+        size,
+        image,
+        price,
+        description,
+        category,
+        stock,
+        status,
+        updatedAt: Date.now(),
+      },
       { new: true }
     );
     if (!product) throw new Error("Item doesn't exist");
@@ -122,7 +134,8 @@ productController.deleteProduct = async (req, res) => {
     const productId = req.params.id;
     const product = await Product.findByIdAndUpdate(
       { _id: productId },
-      { isDeleted: true }
+      { isDeleted: true, updatedAt: Date.now() },
+      { new: true }
     );
     if (!product) throw new Error("No item found");
     res.status(200).json({ status: "success" });
@@ -194,7 +207,9 @@ productController.checkItemListStock = async (itemList) => {
 // 휴지통 기능
 productController.getDeletedProducts = async (req, res) => {
   try {
-    const deletedProducts = await Product.find({ isDeleted: true });
+    const deletedProducts = await Product.find({ isDeleted: true }).sort({
+      updatedAt: -1,
+    });
     res.status(200).json({ status: "success", data: deletedProducts });
   } catch (error) {
     res.status(400).json({ status: "fail", error: error.message });
@@ -207,7 +222,10 @@ productController.restoreProduct = async (req, res) => {
     const { id } = req.params;
     const product = await Product.findByIdAndUpdate(
       id,
-      { isDeleted: false, updatedAt: Date.now() },
+      {
+        isDeleted: false,
+        productAt: Date.now(),
+      },
       { new: true }
     );
     if (!product) throw new Error("No item found");
