@@ -40,31 +40,6 @@ productController.getProducts = async (req, res) => {
   try {
     const { page, name, category } = req.query;
     let response = { status: "success" };
-    // if (name) {
-    //   const product = await Product.find({
-    //     name: { $regex: name, $options: "i" },
-    //   }); // 9-16강의 내용
-    // } else {
-    //   const products = await Product.find({});
-    // }
-
-    // const cond = name
-    //   ? { name: { $regex: name, $options: "i" }, isDeleted: false }
-    //   : { isDeleted: false };
-
-    // 카테고리까지 필터링
-    // // 조건 객체 초기화
-    // let cond = { isDeleted: false }; // 기본 조건: 삭제되지 않은 제품
-
-    // // 이름 필터링 조건 추가
-    // if (name) {
-    //   cond.name = { $regex: name, $options: "i" };
-    // }
-
-    // // 카테고리 필터링 조건 추가
-    // if (category) {
-    //   cond.category = { $in: [category] };
-    // }
     const cond = {
       isDeleted: false,
       ...(name && { name: { $regex: name, $options: "i" } }),
@@ -171,19 +146,13 @@ productController.checkStock = async (item) => {
       message: `${product.name}의 ${item.size}재고가 부족합니다.`,
     };
   }
-  // const newStock = { ...product.stock };
-  // newStock[item.size] -= item.qty;
-  // product.stock = newStock;
 
-  // await product.save();
   // 충분하다면, 재고에서 -qty 성공
   return { isVerify: true };
 };
 
 productController.decreaseStock = async (item) => {
   const product = await Product.findById(item.productId);
-  // product.stock[item.size] -= item.qty;
-  // await product.save();
 
   const newStock = { ...product.stock }; // 새로 객체를 만들어야 반영이 됨 ㅠ
   newStock[item.size] -= item.qty;
